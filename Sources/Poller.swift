@@ -66,11 +66,25 @@ public enum PollItemEvent {
 }
 
 public func poll(_ items: PollItemEvent..., timeout: Int) throws -> [PollItemEvent] {
+    return try poll(items: items, timeout: timeout)
+}
+
+public func poll(items: [PollItemEvent], timeout: Int) throws -> [PollItemEvent] {
     var pollItems = items.map { $0.pollItem }
 
-    if zmq_poll(&pollItems, Int32(pollItems.count), timeout) == -1 {
+    let pollRet = zmq_poll(&pollItems, Int32(pollItems.count), timeout)
+    switch pollRet {
+    case -1:
         throw ZeroMqError.lastError
+    case 0:
+        return []
+    default:
+        return pollItems.flatMap { item in
+            if item.revents != 0 {
+                return PollItemEvent(pollItem: item)
+            } else {
+                return nil
+            }
+        }
     }
-
-    return pollItems.map(PollItemEvent.init)
 }
