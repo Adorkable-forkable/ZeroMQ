@@ -144,7 +144,15 @@ public final class Socket {
         return message
     }
 
-    public func receive(_ bufferSize: Int = 1024, mode: ReceiveMode = []) throws -> Data? {
+    public func receive(_ mode: ReceiveMode = []) throws -> Data? {
+        guard let message = try receiveMessage(mode) else {
+            return nil
+        }
+        let data = Data(bytes: message.data, count: message.size)
+        return data
+    }
+    
+    public func receive(upTo bufferSize: Int, mode: ReceiveMode = []) throws -> Data? {
         var data = Data(count: bufferSize)
         let result = data.withUnsafeMutableBytes { bytes in
             return zmq_recv(socket, bytes, bufferSize, Int32(mode.rawValue))
@@ -700,7 +708,7 @@ extension Socket {
     }
 
     public func receive(_ mode: ReceiveMode = []) throws -> String? {
-        guard let buffer = try receive(mode: mode) else {
+        guard let buffer: Data = try receive(mode) else {
             return nil
         }
         return String(data: buffer, encoding: String.Encoding.utf8)
