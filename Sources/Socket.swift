@@ -109,6 +109,12 @@ public final class Socket {
         return true
     }
     public func send(_ data: Data, mode: SendMode = []) throws -> Bool {
+        guard !data.isEmpty else {
+            // withUnsafeMutableBytes crashes if called on zero-length data.
+            // Still important to make the call to zmq_send in order to have the proper number of parts sent to ZeroMQ.
+            var dummy: [UInt8] = []
+            return try send(&dummy, length: 0, mode: mode)
+        }
         var data = data
         return try data.withUnsafeMutableBytes { bytes in
             return try self.send(bytes, length: data.count, mode: mode)
