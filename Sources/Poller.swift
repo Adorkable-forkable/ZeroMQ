@@ -79,7 +79,7 @@ public func poll(items: [PollItemEvent], timeout: Int) throws -> [PollItemEvent]
     case 0:
         return []
     default:
-        return pollItems.flatMap { item in
+        return pollItems.compactMap { item in
             if item.revents != 0 {
                 return PollItemEvent(pollItem: item)
             } else {

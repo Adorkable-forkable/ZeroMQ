@@ -115,9 +115,11 @@ public final class Socket {
             var dummy: [UInt8] = []
             return try send(&dummy, length: 0, mode: mode)
         }
+
         var data = data
+        let dataCount = data.count
         return try data.withUnsafeMutableBytes { bytes in
-            return try self.send(bytes, length: data.count, mode: mode)
+            return try self.send(bytes, length: dataCount, mode: mode)
         }
     }
 

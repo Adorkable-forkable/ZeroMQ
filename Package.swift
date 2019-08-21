@@ -1,8 +1,25 @@
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
     name: "ZeroMQ",
-    dependencies: [
-        .Package(url: "https://github.com/Zewo/CZeroMQ.git", majorVersion: 1, minor: 0),
+    products: [
+        .library(name: "ZeroMQ", targets: ["ZeroMQ"])
+    ],
+    targets: [
+        .target(
+            name: "ZeroMQ",
+            dependencies: ["libzmq"],
+            path: "Sources"
+        ),
+        .systemLibrary(
+            name: "libzmq",
+            path: "Vendor/ZMQ",
+            pkgConfig: "zmq",
+            providers: [
+                .brew(["zmq"]),
+                .apt(["libzmq"]),
+            ]
+        ),
     ]
 )
